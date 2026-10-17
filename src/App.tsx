@@ -750,7 +750,7 @@ function AudienceVote() {
                 disabled={submittingQ}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-2xl transition text-sm shadow-lg shadow-indigo-600/20"
               >
-                Submit Question
+                Submit Question Here
               </button>
             </form>
 
