@@ -7,6 +7,75 @@ import {
   ThumbsUp, ArrowLeft, MessageSquare, CheckCircle2, Copy, ExternalLink, Trash2
 } from 'lucide-react';
 
+// --- Reusable Multiple Choice Results Bar Chart ---
+function MultipleChoiceResults({ options, votes, isLarge = false }: { options: Option[], votes: Vote[], isLarge?: boolean }) {
+  const totalVotes = votes.length;
+  const optionStats = options.map(opt => {
+    const count = votes.filter(v => v.option_id === opt.id).length;
+    const percent = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+    return { ...opt, count, percent };
+  }).sort((a, b) => b.count - a.count);
+
+  const BAR_STYLES = [
+    { fill: 'bg-indigo-500', text: 'text-indigo-400' },
+    { fill: 'bg-emerald-500', text: 'text-emerald-400' },
+    { fill: 'bg-amber-500', text: 'text-amber-400' },
+    { fill: 'bg-rose-500', text: 'text-rose-400' },
+    { fill: 'bg-cyan-500', text: 'text-cyan-400' },
+    { fill: 'bg-purple-500', text: 'text-purple-400' },
+    { fill: 'bg-violet-500', text: 'text-violet-400' },
+    { fill: 'bg-teal-500', text: 'text-teal-400' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {totalVotes === 0 ? (
+        <div className="bg-slate-900/60 border border-slate-700/60 rounded-2xl p-12 text-center">
+          <BarChart3 className={`${isLarge ? 'w-16 h-16' : 'w-12 h-12'} text-slate-500 mx-auto mb-4 animate-pulse`} />
+          <p className={`text-slate-400 font-medium ${isLarge ? 'text-2xl' : 'text-base'}`}>
+            No votes yet - waiting for the room to respond...
+          </p>
+        </div>
+      ) : (
+        <div className={isLarge ? 'space-y-6' : 'space-y-4'}>
+          {optionStats.map((opt, idx) => {
+            const style = BAR_STYLES[idx % BAR_STYLES.length];
+            return (
+              <div
+                key={opt.id}
+                className={`bg-slate-900/80 border border-slate-700/70 rounded-2xl ${isLarge ? 'p-6' : 'p-4'} relative overflow-hidden shadow-lg`}
+              >
+                <div
+                  className={`absolute top-0 left-0 bottom-0 ${style.fill}/25 transition-all duration-700 ease-out`}
+                  style={{ width: `${opt.percent}%` }}
+                />
+                <div className="relative z-10 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className={`font-bold rounded-lg px-2.5 py-1 bg-slate-800 border border-slate-700 ${isLarge ? 'text-base' : 'text-xs'} text-slate-300`}>
+                      #{idx + 1}
+                    </span>
+                    <span className={`font-bold text-slate-100 ${isLarge ? 'text-2xl' : 'text-base'}`}>
+                      {opt.option_text}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span className={`font-extrabold ${style.text} ${isLarge ? 'text-3xl' : 'text-lg'}`}>
+                      {opt.count} {opt.count === 1 ? 'vote' : 'votes'}
+                    </span>
+                    <span className={`font-bold text-slate-400 w-16 text-right ${isLarge ? 'text-2xl' : 'text-sm'}`}>
+                      {opt.percent}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // --- Navbar / Header ---
 function Navbar() {
   return (
@@ -451,23 +520,12 @@ function PollManagement() {
             </div>
 
             {poll.type === 'choice' ? (
-              <div className="space-y-4">
-                {options.map((opt) => {
-                  const count = votes.filter(v => v.option_id === opt.id).length;
-                  const percent = votes.length > 0 ? Math.round((count / votes.length) * 100) : 0;
-                  return (
-                    <div key={opt.id} className="bg-slate-900/60 border border-slate-700/60 rounded-xl p-4 relative overflow-hidden">
-                      <div className="absolute top-0 left-0 bottom-0 bg-indigo-600/20 transition-all duration-500" style={{ width: `${percent}%` }} />
-                      <div className="relative z-10 flex items-center justify-between">
-                        <span className="font-medium text-slate-200">{opt.option_text}</span>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-indigo-400">{count} votes</span>
-                          <span className="text-xs font-semibold text-slate-400 w-10 text-right">{percent}%</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="space-y-6">
+                <div className="bg-slate-900/90 border border-slate-700/80 rounded-xl p-4 flex items-center justify-between shadow-inner">
+                  <span className="text-slate-300 font-medium text-sm">Total Participation</span>
+                  <span className="text-2xl font-extrabold text-indigo-400">{votes.length} {votes.length === 1 ? 'vote' : 'votes'}</span>
+                </div>
+                <MultipleChoiceResults options={options} votes={votes} />
               </div>
             ) : (
               <div className="space-y-3">
@@ -487,6 +545,25 @@ function PollManagement() {
             )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Stats Summary Card ---
+function StatsSummary({ totalVotes }: { totalVotes: number }) {
+  return (
+    <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-2xl p-4 mb-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-600/20 rounded-xl flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-indigo-400" />
+          </div>
+          <span className="text-slate-300 font-medium">Total Votes</span>
+        </div>
+        <span className="text-3xl font-bold text-indigo-400">
+          {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
+        </span>
       </div>
     </div>
   );
@@ -569,23 +646,8 @@ function PresenterView() {
 
       <div className="my-auto py-8">
         {poll.type === 'choice' ? (
-          <div className="space-y-6 max-w-4xl">
-            {options.map((opt) => {
-              const count = votes.filter(v => v.option_id === opt.id).length;
-              const percent = votes.length > 0 ? Math.round((count / votes.length) * 100) : 0;
-              return (
-                <div key={opt.id} className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 bottom-0 bg-indigo-600/30 transition-all duration-700" style={{ width: `${percent}%` }} />
-                  <div className="relative z-10 flex items-center justify-between">
-                    <span className="text-2xl font-bold text-slate-100">{opt.option_text}</span>
-                    <div className="flex items-center gap-4">
-                      <span className="text-3xl font-extrabold text-indigo-400">{count}</span>
-                      <span className="text-xl font-bold text-slate-400 w-16 text-right">{percent}%</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="max-w-5xl w-full">
+            <MultipleChoiceResults options={options} votes={votes} isLarge={true} />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl">
