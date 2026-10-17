@@ -1,0 +1,1 @@
+PulseLive is a lightweight Slido or Mentimeter: a presenter creates a poll or a Q&A, the audience joins from their phones by scanning a QR code with no login, and the results appear on screen in real time as people respond.
