@@ -131,7 +131,7 @@ function Dashboard() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Presenter Dashboard</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">Presenter Dashboard - Emeka</h1>
           <p className="text-slate-400 mt-1">Manage your live polls and Q&A sessions.</p>
         </div>
         <button onClick={() => navigate('/create')} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition">
